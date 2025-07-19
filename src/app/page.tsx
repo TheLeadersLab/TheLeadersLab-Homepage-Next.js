@@ -45,8 +45,12 @@ const sections = [
 ];
 
 export default function Home() {
-  const { currentUser } = useAuth(); // Get the current user
+  const { currentUser, loading: authLoading } = useAuth(); // Get the current user and auth loading status
   const [showAddForm, setShowAddForm] = useState(false); // State for form visibility
+
+  // Determine if the login/add form should be shown initially
+  // Show it if not logged in, or if logged in and the form toggle is active
+  const showFormSection = !currentUser || showAddForm;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#262b5e] via-background to-[#e0a32f]/20">
@@ -64,7 +68,7 @@ export default function Home() {
           <div className="relative max-w-md mx-auto mb-16 backdrop-blur-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
-              placeholder="Search all content..."
+              placeholder="Search articles..."
               className="pl-10 pr-4 py-3 text-lg w-full bg-white/80 dark:bg-gray-900/80 border-[#e0a32f]/30 focus:border-[#e0a32f] backdrop-blur-sm"
             />
           </div>
@@ -120,20 +124,27 @@ export default function Home() {
             leadership, communication, and agile work.
           </p>
 
-          {/* Button to toggle blog post form, only visible when logged in */}
-          {currentUser && (
+          {/* Login/Add Blog Post Form Section */}
+          {!authLoading && ( // Only render if auth status has loaded
             <div className="text-center mb-8">
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="bg-[#e0a32f] text-white py-3 px-6 rounded-md hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e0a32f] transition duration-150 ease-in-out font-semibold text-lg"
-              >
-                {showAddForm ? 'Hide Blog Post Form' : 'Add New Blog Post'}
-              </button>
+              {!currentUser ? (
+                // Show login form directly if not logged in
+                <AddBlogPostForm /> 
+              ) : (
+                // Show toggle button if logged in
+                <button
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="bg-[#e0a32f] text-white py-3 px-6 rounded-md hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e0a32f] transition duration-150 ease-in-out font-semibold text-lg"
+                >
+                  {showAddForm ? 'Hide Blog Post Form' : 'Add New Blog Post'}
+                </button>
+              )}
             </div>
           )}
 
-          {/* Blog post form, displayed based on state */}
-          {showAddForm && <AddBlogPostForm />}
+          {/* Blog post form, displayed based on state if logged in and toggled */}
+          {currentUser && showAddForm && <AddBlogPostForm />}
+
 
           {/* Filter & Search (taken from original screenshot) */}
           <div className="bg-white shadow-md rounded-lg p-6 mb-12">
