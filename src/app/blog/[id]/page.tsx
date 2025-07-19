@@ -18,7 +18,7 @@ interface BlogPost {
   createdAt: {
     seconds: number;
     nanoseconds: number;
-  };
+  }; // Firestore Timestamp
 }
 
 const BlogPostDetailPage: React.FC = () => {
@@ -48,9 +48,13 @@ const BlogPostDetailPage: React.FC = () => {
         } else {
           setError('Blogpost nicht gefunden.');
         }
-      } catch (err: any) {
+      } catch (err: unknown) { // Typ von 'any' zu 'unknown' geändert
         console.error('Fehler beim Laden des Blogposts:', err);
-        setError('Fehler beim Laden des Blogposts: ' + err.message);
+        if (err instanceof Error) { // Fehlerbehandlung für 'unknown'
+          setError('Fehler beim Laden des Blogposts: ' + err.message);
+        } else {
+          setError('Ein unbekannter Fehler ist aufgetreten.');
+        }
       } finally {
         setLoading(false);
       }
