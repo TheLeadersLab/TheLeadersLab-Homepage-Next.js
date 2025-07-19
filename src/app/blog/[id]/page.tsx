@@ -22,7 +22,8 @@ interface BlogPost {
   }; // Firestore Timestamp
 }
 
-// Definiere die Props-Schnittstelle, um den 'PageProps'-Constraint zu erfüllen
+// Definiere die Props-Schnittstelle, die Next.js für statisch exportierte Seiten erwartet
+// Die 'params' sind hier einfach ein Objekt, keine Promise
 interface BlogPostDetailPageProps {
   params: {
     id: string;
