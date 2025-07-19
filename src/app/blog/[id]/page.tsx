@@ -22,6 +22,15 @@ interface BlogPost {
   }; // Firestore Timestamp
 }
 
+// Definiere die Props-Schnittstelle, um den 'PageProps'-Constraint zu erfüllen
+interface BlogPostDetailPageProps {
+  params: {
+    id: string;
+  };
+  // searchParams sind optional, können aber von Next.js übergeben werden
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
 // generateStaticParams Funktion für statischen Export
 // Diese Funktion wird zur Build-Zeit auf dem Server ausgeführt, um alle möglichen Blogpost-IDs zu ermitteln
 export async function generateStaticParams() {
@@ -37,7 +46,7 @@ export async function generateStaticParams() {
 }
 
 // Die Page-Komponente ist jetzt eine Server-Komponente
-export default async function BlogPostDetailPage({ params }: { params: { id: string } }) {
+export default async function BlogPostDetailPage({ params }: BlogPostDetailPageProps) { // Typ der Props angepasst
   const { id } = params; // Hole die Blogpost-ID aus den URL-Parametern (Server-seitig)
 
   let blogPost: BlogPost | null = null;
