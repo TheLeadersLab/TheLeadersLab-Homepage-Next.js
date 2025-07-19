@@ -27,27 +27,34 @@ interface BlogPostDetailPageProps {
   params: {
     id: string;
   };
+  // searchParams sind optional, können aber von Next.js übergeben werden
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-// ✅ Korrigierte generateStaticParams Funktion
-export async function generateStaticParams(): Promise<{ params: { id: string } }[]> {
+// generateStaticParams Funktion für statischen Export
+// Diese Funktion wird zur Build-Zeit auf dem Server ausgeführt, um alle möglichen Blogpost-IDs zu ermitteln
+export async function generateStaticParams() {
+  // Hole alle Dokumente aus der 'blogPosts'-Sammlung
   const querySnapshot = await getDocs(collection(db, 'blogPosts'));
-
-  return querySnapshot.docs.map((doc) => ({
-    params: { id: doc.id },
+  
+  // Erstelle ein Array von Parametern für jede Blogpost-ID
+  const params = querySnapshot.docs.map(doc => ({
+    id: doc.id,
   }));
+
+  return params;
 }
 
 // Die Page-Komponente ist jetzt eine Server-Komponente
-export default async function BlogPostDetailPage({ params }: BlogPostDetailPageProps) {
-  const { id } = params;
+export default async function BlogPostDetailPage({ params }: BlogPostDetailPageProps) { // Typ der Props angepasst
+  const { id } = params; // Hole die Blogpost-ID aus den URL-Parametern (Server-seitig)
 
   let blogPost: BlogPost | null = null;
   let error: string = '';
   let loading: boolean = true;
 
   try {
+    // Hole das spezifische Blogpost-Dokument aus Firestore
     const docRef = doc(db, 'blogPosts', id);
     const docSnap = await getDoc(docRef);
 
@@ -64,9 +71,10 @@ export default async function BlogPostDetailPage({ params }: BlogPostDetailPageP
       error = 'Ein unbekannter Fehler ist aufgetreten.';
     }
   } finally {
-    loading = false;
+    loading = false; // Setze loading auf false, da der Fetch abgeschlossen ist
   }
 
+  // Rendere die Client-Komponente und übergebe die Daten als Props
   return (
     <BlogPostDetailClient blogPost={blogPost} loading={loading} error={error} />
   );
