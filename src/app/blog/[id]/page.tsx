@@ -22,16 +22,6 @@ interface BlogPost {
   }; // Firestore Timestamp
 }
 
-// Definiere die Props-Schnittstelle, die Next.js für statisch exportierte Seiten erwartet
-// Die 'params' sind hier einfach ein Objekt, keine Promise
-interface BlogPostDetailPageProps {
-  params: {
-    id: string;
-  };
-  // searchParams sind optional, können aber von Next.js übergeben werden
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
-
 // generateStaticParams Funktion für statischen Export
 // Diese Funktion wird zur Build-Zeit auf dem Server ausgeführt, um alle möglichen Blogpost-IDs zu ermitteln
 export async function generateStaticParams() {
@@ -47,7 +37,8 @@ export async function generateStaticParams() {
 }
 
 // Die Page-Komponente ist jetzt eine Server-Komponente
-export default async function BlogPostDetailPage({ params }: BlogPostDetailPageProps) { // Typ der Props angepasst
+// Verwende hier direkt den erwarteten Typ für die Props, um den Kompatibilitätsfehler zu umgehen
+export default async function BlogPostDetailPage({ params }: { params: { id: string } }) { // Typ direkt im Argument definiert
   const { id } = params; // Hole die Blogpost-ID aus den URL-Parametern (Server-seitig)
 
   let blogPost: BlogPost | null = null;
