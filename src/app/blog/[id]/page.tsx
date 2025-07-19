@@ -27,34 +27,27 @@ interface BlogPostDetailPageProps {
   params: {
     id: string;
   };
-  // searchParams sind optional, können aber von Next.js übergeben werden
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-// generateStaticParams Funktion für statischen Export
-// Diese Funktion wird zur Build-Zeit auf dem Server ausgeführt, um alle möglichen Blogpost-IDs zu ermitteln
-export async function generateStaticParams() {
-  // Hole alle Dokumente aus der 'blogPosts'-Sammlung
+// ✅ Korrigierte generateStaticParams Funktion
+export async function generateStaticParams(): Promise<{ params: { id: string } }[]> {
   const querySnapshot = await getDocs(collection(db, 'blogPosts'));
-  
-  // Erstelle ein Array von Parametern für jede Blogpost-ID
-  const params = querySnapshot.docs.map(doc => ({
-    id: doc.id,
-  }));
 
-  return params;
+  return querySnapshot.docs.map((doc) => ({
+    params: { id: doc.id },
+  }));
 }
 
 // Die Page-Komponente ist jetzt eine Server-Komponente
-export default async function BlogPostDetailPage({ params }: BlogPostDetailPageProps) { // Typ der Props angepasst
-  const { id } = params; // Hole die Blogpost-ID aus den URL-Parametern (Server-seitig)
+export default async function BlogPostDetailPage({ params }: BlogPostDetailPageProps) {
+  const { id } = params;
 
   let blogPost: BlogPost | null = null;
   let error: string = '';
   let loading: boolean = true;
 
   try {
-    // Hole das spezifische Blogpost-Dokument aus Firestore
     const docRef = doc(db, 'blogPosts', id);
     const docSnap = await getDoc(docRef);
 
@@ -71,10 +64,9 @@ export default async function BlogPostDetailPage({ params }: BlogPostDetailPageP
       error = 'Ein unbekannter Fehler ist aufgetreten.';
     }
   } finally {
-    loading = false; // Setze loading auf false, da der Fetch abgeschlossen ist
+    loading = false;
   }
 
-  // Rendere die Client-Komponente und übergebe die Daten als Props
   return (
     <BlogPostDetailClient blogPost={blogPost} loading={loading} error={error} />
   );
