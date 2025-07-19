@@ -1,10 +1,12 @@
 // src/app/blog/[id]/page.tsx
-'use client'; // This is a Client Component
+// HINWEIS: Diese Seite muss serverseitig gerendert werden, damit generateStaticParams funktioniert.
+// 'use client'; ist hier für die Interaktivität nach dem Laden, aber generateStaticParams läuft auf dem Server.
 
 import React, { useEffect, useState } from 'react';
-import { db } from '@/lib/firebase'; // Importiere die Firestore-Instanz
-import { doc, getDoc } from 'firebase/firestore';
-import { useParams } from 'next/navigation'; // Hook, um URL-Parameter zu lesen
+// Importiere die Firestore-Instanzen für Server- und Client-Seite
+import { db } from '@/lib/firebase'; // Client-seitige Firestore-Instanz
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore'; // getDocs für generateStaticParams
+import { useParams } from 'next/navigation'; // Hook, um URL-Parameter zu lesen (Client)
 import Link from 'next/link';
 
 // Definiere den Typ für einen Blogpost
@@ -19,6 +21,20 @@ interface BlogPost {
     seconds: number;
     nanoseconds: number;
   }; // Firestore Timestamp
+}
+
+// generateStaticParams Funktion für statischen Export
+// Diese Funktion wird zur Build-Zeit auf dem Server ausgeführt, um alle möglichen Blogpost-IDs zu ermitteln
+export async function generateStaticParams() {
+  // Hole alle Dokumente aus der 'blogPosts'-Sammlung
+  const querySnapshot = await getDocs(collection(db, 'blogPosts')); // Nutzt die Client-seitige DB-Instanz, die auch im Build-Prozess funktioniert
+  
+  // Erstelle ein Array von Parametern für jede Blogpost-ID
+  const params = querySnapshot.docs.map(doc => ({
+    id: doc.id,
+  }));
+
+  return params;
 }
 
 const BlogPostDetailPage: React.FC = () => {
@@ -64,15 +80,27 @@ const BlogPostDetailPage: React.FC = () => {
   }, [id]); // Abhängigkeit von 'id', um den Fetch bei ID-Änderung auszulösen
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-700">Lade Blogpost...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center py-8 text-gray-700">Lade Blogpost...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center py-8 text-red-600">Fehler: {error}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center py-8 text-red-600">Fehler: {error}</div>
+      </div>
+    );
   }
 
   if (!blogPost) {
-    return <div className="text-center py-8 text-gray-700">Blogpost nicht verfügbar.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center py-8 text-gray-700">Blogpost nicht verfügbar.</div>
+      </div>
+    );
   }
 
   // Hilfsfunktion, um den YouTube-Video-ID aus verschiedenen URL-Formaten zu extrahieren
