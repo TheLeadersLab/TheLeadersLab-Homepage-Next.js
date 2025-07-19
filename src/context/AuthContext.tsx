@@ -37,9 +37,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       console.log('Successfully logged in!');
-    } catch (error: any) {
-      console.error('Login error:', error.message);
-      throw error; // Re-throw the error so the calling component can handle it
+    } catch (err: unknown) { // Typ von 'any' zu 'unknown' geändert
+      console.error('Login error:', err);
+      if (err instanceof Error) { // Fehlerbehandlung für 'unknown'
+        throw new Error('Login error: ' + err.message);
+      } else {
+        throw new Error('An unknown login error occurred.');
+      }
     }
   };
 
@@ -48,9 +52,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await signOut(auth);
       console.log('Successfully logged out!');
-    } catch (error: any) {
-      console.error('Logout error:', error.message);
-      throw error;
+    } catch (err: unknown) { // Typ von 'any' zu 'unknown' geändert
+      if (err instanceof Error) { // Fehlerbehandlung für 'unknown'
+        throw new Error('Logout error: ' + err.message);
+      } else {
+        throw new Error('An unknown logout error occurred.');
+      }
     }
   };
 
@@ -70,8 +77,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// ...existing code...
-
 // Custom Hook for easy consumption of AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -80,5 +85,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-// ...existing code...
