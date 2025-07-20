@@ -1,8 +1,8 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Entferne die Zeile 'output: 'export','
-  // ... andere bestehende Einstellungen hier
+  // Hier sollten jetzt keine 'output: 'export',' Zeile mehr sein
+  // ... andere bestehende Einstellungen hier (falls vorhanden)
 };
 
 export default nextConfig;
